@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HPCL Employee Chat</title>
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/common.css">
+
+    <script src="js/jquery.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<body ng-app="loginFlow" ng-controller="loginFlowController">
+<div class="container">
+    <div class="containerBox">
+        <div class="headerIcon">
+            <i class="fa fa-user fa-5x"></i>
+        </div>
+        <h1>Sign Up</h1>
+        <form ng-submit="signup()">
+            <div class="alert alert-danger" ng-show="registerAlert">
+                This employee id is already registered.
+            </div>
+            <section class="inputContainer">
+                <label for="empId">
+                    <i class="fa fa-user fa-2x"></i>
+                </label>
+                <input type="text" class="form-control input-lg" id="empId" ng-model="empid"
+                       name="id" placeholder="Employee id" required="required">
+            </section>
+            <section class="inputContainer">
+                <label for="username">
+                    <i class="fa fa-user fa-2x"></i>
+                </label>
+                <input type="text" class="form-control input-lg" id="username" ng-model="username"
+                       name="username" placeholder="Name" required="required">
+            </section>
+            <section class="inputContainer">
+                <label for="designation">
+                    <i class="fa fa-id-badge fa-2x"></i>
+                </label>
+                <input type="text" class="form-control input-lg" id="designation" ng-model="designation"
+                       name="designation" placeholder="Designation" required="required">
+            </section>
+            <section class="inputContainer">
+                <label for="email">
+                    <i class="fa fa-envelope-o fa-2x"></i>
+                </label>
+                <input type="email" class="form-control input-lg" id="email" ng-model="email"
+                       name="email" placeholder="Email ID" required="required">
+            </section>
+            <section class="inputContainer">
+                <label for="password">
+                    <i class="fa fa-key fa-2x"></i>
+                </label>
+                <input type="password" class="form-control input-lg" id="password" ng-model="password"
+                       name="password" placeholder="Password" required="required">
+            </section>
+            <section class="inputContainer">
+                <button type="button" class="btn" ng-click="open()">
+                    <span><i class="fa fa-upload fa-lg"></i></span>
+                    <span>Upload Profile Picture</span>
+                </button>
+                <div class="photoFileName" style="font-weight: bold">No File Selected</div>
+                <input type="file" id="photo" style="display: none" accept="image/*" onchange="angular.element(this).scope().checkFile()">
+            </section>
+            <button type="submit" class="btn btn-lg">Sign Up</button>
+        </form>
+
+        <div class="toggleLink">
+            Already have an account?
+            <a href="/login">Login</a>
+        </div>
+    </div>
+</div>
+
+<script src="js/loginflow.js"></script>
+</body>
+</html>

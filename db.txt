@@ -1,0 +1,36 @@
+CREATE TABLE IF NOT EXISTS `employees` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `empid` varchar(10) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `password` varchar(33) NOT NULL,
+  `designation` varchar(50),
+  `photo` varchar(25),
+  `online` tinyint(1) NOT NULL default 0,
+  `email` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `chats` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `msgtext` text,
+  `from_id` varchar(10) NOT NULL,
+  `to_id` varchar(10) NOT NULL,
+  `sendtime` bigint(13) NOT NULL,
+  `receivetime` bigint(13),
+  `msgstatus` varchar(2) NOT NULL DEFAULT "N",
+  PRIMARY KEY (`id`)
+);
+
+create table media(
+    msgid int(10) primary key,
+    filename varchar(50) not null,
+    diskfilename varchar(25) not null,
+    type varchar(5) not null,
+    foreign key (msgid) references chats(id) on delete cascade
+);
+
+create table passwordrecovery(
+    empid varchar(10) primary key,
+    token varchar(33) not null
+);

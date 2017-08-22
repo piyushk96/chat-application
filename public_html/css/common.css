@@ -1,0 +1,78 @@
+body{
+    background: url("../assets/bg.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.containerBox{
+    background-color: white;
+    margin: 100px auto;
+    border-radius: 5px;
+    width: 500px;
+    text-align: center;
+    position: relative;
+    padding: 50px 0;
+}
+.headerIcon{
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(47, 128, 237);
+    border-radius: 50%;
+    position: absolute;
+    top: -60px;
+    right: 190px;
+    color: white;
+}
+h1{
+    margin: 30px 0 15px;
+}
+form{
+    width: 100%;
+}
+.inputContainer{
+    width: 70%;
+    margin: 30px auto;
+    position: relative;
+}
+.inputContainer input{
+    padding-left: 50px;
+    border-color: darkblue;
+}
+label{
+    position: absolute;
+    left: 15px;
+    top: 10px;
+    color: darkblue;
+}
+#forgotPswd{
+    margin: -10px auto 20px;
+    text-align: left;
+    width: 70%;
+    font-size: 15px;
+}
+#forgotPswd a{
+    cursor: pointer;
+    color: #0f0fe8;
+}
+.toggleLink{
+    margin-top: 40px;
+    font-size: 20px;
+}
+.toggleLink a{
+    cursor: pointer;
+    color: #0f0fe8;
+}
+.alert{
+    width: 80%;
+    margin: 0 auto 20px;
+}
+.btn{
+    background-color: darkblue;
+    color: white;
+}
+.btn:hover, .btn:active, .btn:focus {
+    color: yellow;
+}

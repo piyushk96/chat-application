@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HPCL Employee Chat</title>
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/common.css">
+
+    <script src="js/jquery.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</head>
+<body ng-app="loginFlow" ng-controller="loginFlowController">
+    <div class="container">
+        <div class="containerBox">
+            <div class="headerIcon">
+                <i class="fa fa-user fa-5x"></i>
+            </div>
+            <h1>Login</h1>
+            <form ng-submit="login()">
+                <div class="alert alert-danger" ng-show="loginAlert">
+                    Wrong Employee Id and Password combination.
+                </div>
+                <div class="alert alert-success" ng-show="pswdResetAlert">
+                    Details for password reset has been sent to your email.
+                </div>
+                <div class="alert alert-warning" ng-show="enterIdAlert">
+                    Enter Employee Id First.
+                </div>
+                <section class="inputContainer">
+                    <label for="empId">
+                        <i class="fa fa-user fa-2x"></i>
+                    </label>
+                    <input type="text" class="form-control input-lg" id="empId" ng-model="empid"
+                           name="id" placeholder="Employee id" tabindex="1" required="required">
+                </section>
+                <section class="inputContainer">
+                    <label for="password">
+                        <i class="fa fa-key fa-2x"></i>
+                    </label>
+                    <input type="password" class="form-control input-lg" id="password" ng-model="password"
+                           name="password" placeholder="Password" tabindex="2" required="required">
+                </section>
+                <div id="forgotPswd"><a ng-click="forgotPassword()">Forgot Password ?</a></div>
+                <button class="btn btn-lg" type="submit" tabindex="3">Login</button>
+            </form>
+
+            <div class="toggleLink">
+                Don't have an account?
+                <a href="/signup" tabindex="4">Signup</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/loginflow.js"></script>
+</body>
+</html>

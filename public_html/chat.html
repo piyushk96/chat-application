@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HPCL Employee Chat</title>
+    <script>
+        var empid = sessionStorage.getItem('chatUser');
+        if(empid == '' || empid == null)
+            window.location.href = '/';
+    </script>
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/chat.css">
+
+    <script src="js/jquery.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body ng-app="chatPage" ng-controller="chatController">
+    <div class="row">
+        <div class="col-md-4 col-sm-4 col-xs-4 pane" id="chatListPane">
+            <header>
+                <div class="userPane">
+                    <div class="avatar">
+                        <img class="img-circle" ng-src="{{currentUser.photo}}">
+                    </div>
+                    <div class="userPane-body">
+                        <div class="userName" title="{{currentUser.name}}">{{currentUser.name}}</div>
+                        <div class="onlineTitle">{{currentUser.online ? 'online' : 'offline'}}</div>
+                    </div>
+                    <div class="userPane-controls">
+                        <div class="controlItem newChat" title="New Chat" ng-click="showContactList=true; fetchAllContacts()">
+                            <i class="fa fa-comments-o fa-2x" aria-label="New Chat"></i>
+                        </div>
+                        <div class="controlItem dropdown"  id="leftPaneDropdownMenu">
+                            <div class="dropdown-toggle" title="Menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v fa-2x" aria-label="Menu"></i>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="leftPaneDropdownMenu">
+                                <li>
+                                    <a data-toggle="modal" data-target="#broadcastListPopup" ng-click="fetchAllContacts()">
+                                        <span><i class="fa fa-bullhorn fa-lg" aria-label="Broadcast"></i></span>
+                                        <span>Broadcast</span>
+                                    </a>
+                                </li>
+                                <!--<li>-->
+                                    <!--<a>-->
+                                        <!--<span><i class="fa fa-user-circle fa-lg" aria-label="Profile"></i></span>-->
+                                        <!--<span>Profile</span>-->
+                                    <!--</a>-->
+                                <!--</li>-->
+                                <li>
+                                    <a ng-click="logout()">
+                                        <span><i class="fa fa-power-off fa-lg" aria-label="Logout"></i></span>
+                                        <span>Logout</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="searchBoxWrapper">
+                <section class="searchBox">
+                    <label for="chatlistSearchInput">
+                        <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                    </label>
+                    <input type="search" ng-model="searchInput" class="form-control" id="chatlistSearchInput" placeholder="Search Employee's Name or Designation">
+                </section>
+            </div>
+            <div class="userListWrapper">
+                <ul class="chatList list-group">
+                    <li ng-repeat="singleUser in chatList | filter : searchInput"
+                        class="list-group-item" ng-click="selectUser(singleUser)"
+                        ng-class="(singleUser.empid==selectedUser.empid) ? 'selected' : ''" id="recentemp_{{singleUser.empid}}">
+                        <div class="userPane">
+                            <div class="avatar">
+                                <img class="img-circle" ng-src="{{singleUser.photo}}">
+                            </div>
+                            <div class="onlineIndicator" ng-class="singleUser.online ? 'online' : 'offline'" title="{{singleUser.online? 'Online' : 'Offline'}}"></div>
+                            <div class="userPane-body">
+                                <div class="userName" title="{{singleUser.name}}" ng-bind-html="singleUser.name | highlight : searchInput">{{singleUser.name}}</div>
+                                <div class="designation" ng-bind-html="singleUser.designation | highlight : searchInput">{{singleUser.designation}}</div>
+                            </div>
+                            <div class="userPane-controls">
+                                <div class="badge">{{singleUser.unreads==0 ? "" : singleUser.unreads}}</div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="pane allContactsPane" ng-class="showContactList ? 'activePane' : ''">
+            <header>
+                <div class="headerContent">
+                    <span class="back" ng-click="showContactList = false">
+                        <i class="fa fa-arrow-left fa-lg"></i>
+                    </span>
+                    <span class="headerTitle">new chat</span>
+                </div>
+            </header>
+            <div class="searchBoxWrapper">
+                <section class="searchBox">
+                    <label for="allContactSearch">
+                        <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                    </label>
+                    <input type="search" ng-model="contactSearchInput" class="form-control" id="allContactSearch" placeholder="Search Employee's Name or Designation">
+                </section>
+            </div>
+            <div class="userListWrapper">
+                <ul class="list-group" id="allContactsList">
+                    <li ng-repeat="singleContact in allContactsList | filter : contactSearchInput"
+                        class="list-group-item" ng-click="selectUser(singleContact)"
+                        ng-class="(singleContact.empid==selectedUser.empid) ? 'selected' : ''" id="emp_{{singleContact.empid}}">
+                        <div class="userPane">
+                            <div class="avatar">
+                                <img class="img-circle" ng-src="{{singleContact.photo}}">
+                            </div>
+                            <div class="onlineIndicator" ng-class="singleContact.online ? 'online' : 'offline'" title="{{singleContact.online ? 'Online' : 'Offline'}}"></div>
+                            <div class="userPane-body">
+                                <div class="userName" title="{{singleContact.name}}" ng-bind-html="singleContact.name | highlight : contactSearchInput">{{singleContact.name}}</div>
+                                <div class="designation" ng-bind-html="singleContact.designation | highlight : contactSearchInput">{{singleContact.designation}}</div>
+                            </div>
+                            <div class="userPane-controls">
+                                <div class="badge">{{singleContact.unreads==0 ? "" : singleContact.unreads}}</div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div ng-if="chatMessagePane" class="col-md-8 col-sm-8 col-xs-8 pane" id="chatMessagePane">
+            <header>
+                <div class="userPane">
+                    <div class="avatar">
+                        <img class="img-circle" ng-if="!broadcast" ng-src="{{selectedUser.photo}}">
+                    </div>
+                    <div class="userPane-body" ng-if="broadcast">{{broadcastHeader}}</div>
+                    <div class="userPane-body" ng-if="!broadcast">
+                        <div class="userName" title="{{selectedUser.name}}">{{selectedUser.name}}</div>
+                        <div class="onlineTitle">{{selectedUser.online ? 'online' : 'offline'}}</div>
+                    </div>
+                    <div class="userPane-controls">
+                        <div class="controlItem dropdown" id="rightPaneDropdownMenu">
+                            <div class="dropdown-toggle" title="Attach" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-paperclip fa-2x" aria-label="Attach"></i>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="rightPaneDropdownMenu">
+                                <li>
+                                    <a ng-click="triggerUploadInput(false)">
+                                        <img src="assets/image.svg">
+                                        <span>Image</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a ng-click="triggerUploadInput(false)">
+                                        <img src="assets/docs.svg">
+                                        <span>Document</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a ng-click="triggerUploadInput(false)">
+                                        <img src="assets/video.svg">
+                                        <span>Video</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            <input id="uploadInput" type="file" multiple="multiple"
+                                   onchange="angular.element(this).scope().openPreview(this.files)" style="display: none"
+                                   accept="image/*,video/*,text/plain,text/rtf,application/pdf,application/msword,
+                                   application/vnd.ms-excel,application/vnd.ms-powerpoint,
+                                   application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                   application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                   application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" >
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="chatPaneBody">
+                <div class="messageContainer">
+                    <ul class="messageList">
+                        <li ng-repeat="msg in messages" class="message" id="msg_{{$index + 1}}">
+                            <div class="messageWrapper" data-id="{{msg.id}}" ng-class="(currentUser.empid==msg.from_id) ? 'messageSend' : 'messageReceived'">
+                                <span class="tip"></span>
+                                <a href="{{msg.mediaUrl}}" target="_blank">
+                                    <div class="messageMedia" ng-class="msg.type!='docs' ? 'media-img':''" ng-if="msg.mediaUrl != '' && msg.mediaUrl != null">
+                                        <img ng-src="{{msg.mediaImageUrl}}" ng-if="msg.type!='vid'">
+                                        <video class="videoMsg" ng-src="{{msg.mediaUrl}}" ng-if="msg.type=='vid'"></video>
+                                    </div>
+                                    <span class="play" ng-if="msg.type=='vid'">
+                                        <i class="fa fa-play-circle-o fa-5x"></i>
+                                    </span>
+                                    <div class="mediaName" ng-if="msg.type=='docs'">{{msg.filename}}</div>
+                                </a>
+                                <div class="messageText">{{msg.msgtext}}</div>
+                                <div class="messageMeta">
+                                    <span class="messageTime">{{(currentUser.empid==msg.from_id) ? getMsgTime(msg.sendtime) : getMsgTime(msg.receivetime)}}</span>
+                                    <span class="messageStatus" ng-class="(currentUser.empid==msg.from_id && msg.msgstatus=='Y') ? 'read' : 'unread'">
+                                    <i class="fa fa-lg" ng-if="!broadcast" ng-class="(currentUser.empid==msg.from_id && msg.msgstatus=='W') ? 'fa-spinner fa-pulse' : 'fa-check'"></i>
+                                </span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <footer>
+                    <div class="inputBlock">
+                        <div class="inputContainer">
+                            <div class="message-input" id="messageInputBox" ng-keydown="enterEvent($event)" contenteditable="true" spellcheck="true" data-text="Enter Your Message Here"></div>
+                        </div>
+                        <span class="sendKey" id="sendMessage" ng-click="sendMessage(selectedUser.empid)">
+                            <i title="Send" class="fa fa-send-o fa-2x" aria-label="Send Message"></i>
+                        </span>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <div ng-if="!chatMessagePane" class="col-md-8 col-sm-8 col-xs-8 pane" id="welcomePane">
+            <div class="welcomePaneContent">
+                <div class="welcomeAvatar">
+                    <img class="img-circle" ng-src="{{currentUser.photo}}">
+                </div>
+                <div class="welcomeTitle">
+                    <h1>Welcome<br><span>{{currentUser.name}}</span></h1>
+                </div>
+                <div class="separator"></div>
+                <div class="welcomePaneText">
+                    <div>
+                        Click on&nbsp;
+                        <span class="fa fa-comments-o fa-lg"></span>
+                        &nbsp;to start a new chat,
+                    </div>
+                    <div>or select an employee from recent chats.</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="mediaPreviewPopup" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="close" data-dismiss="modal">
+                        <i class="fa fa-close fa-lg"></i>
+                    </div>
+                    <p class="modal-title">Media Preview</p>
+                </div>
+                <div class="modal-body">
+                    <div class="previewMediaContainer">
+                        <div class="previewMediaElement">
+                            <img ng-src="{{selectedMedia.url}}" ng-if="selectedMedia.type!='vid'">
+                            <video controls ng-src="{{selectedMedia.url}}" ng-if="selectedMedia.type=='vid'"></video>
+                        </div>
+                        <div class="mediaName" ng-if="selectedMedia.type=='docs'">{{selectedMedia.file.name}}</div>
+                    </div>
+                    <div class="inputBlock">
+                        <div class="inputContainer">
+                            <input ng-model="selectedMedia.caption" class="form-control" id="mediaCaptionInputBox"
+                                   placeholder="Enter A Caption">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <ul>
+                        <li ng-repeat="media in uploadMedia" class="mediaContainer" ng-class="media == selectedMedia ? 'selectedMedia' : ''"
+                                                        ng-click="selectMedia(media)" data-caption="{{media.caption}}" >
+                            <div class="mediaElement" ng-style="{ 'background-image' : 'url({{media.url}})' }"></div>
+                        </li>
+                        <li class="addMoreMedia" ng-click="triggerUploadInput(true)">
+                            <div>
+                                <span><i class="fa fa-plus fa-lg"></i></span>
+                                ADD MEDIA
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="sendKeyContainer" id="uploadMedia" ng-click="upload()">
+                        <span class="sendKey">
+                            <i title="Send" class="fa fa-send fa-2x" aria-label="Send Message"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="broadcastListPopup" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="close" data-dismiss="modal">
+                        <i class="fa fa-close fa-lg"></i>
+                    </div>
+                    <p class="modal-title">Select Brodcast List</p>
+                </div>
+                <div class="modal-body">
+                    <div class="searchBoxWrapper">
+                        <section class="searchBox">
+                            <label for="broadcastSearchInput">
+                                <i class="fa fa-search fa-lg"></i>
+                            </label>
+                            <input type="search" autofocus="autofocus" ng-model="broadcastSearchInput" class="form-control" id="broadcastSearchInput" placeholder="Search Employee's Name or Designation">
+                        </section>
+                    </div>
+                    <div class="userListWrapper">
+                        <ul class="broadcastList list-group">
+                            <li ng-repeat="user in allContactsList | filter : broadcastSearchInput" class="list-group-item" ng-click="selectBroadcastList(user)"
+                                ng-class="(user.empid==selectedNewUser.empid) ? 'selected' : ''" id="brdcast_{{user.empid}}">
+
+                                <div class="userPane">
+                                    <div class="avatar">
+                                        <img class="img-circle" ng-src="{{user.photo}}">
+                                    </div>
+                                    <div class="onlineIndicator" ng-class="(user.online=='Y') ? 'online' : 'offline'"></div>
+                                    <div class="userPane-body">
+                                        <div class="userName" ng-bind-html="user.name | highlight : broadcastSearchInput">{{user.name}}</div>
+                                        <div class="designation" ng-bind-html="user.designation | highlight : broadcastSearchInput">{{user.designation}}</div>
+                                    </div>
+                                    <div class="userPane-controls">
+                                        <div class="controlItem">
+                                            <input type="checkbox" class="checkBox" id="check_{{user.empid}}" ng-checked="user.checked" disabled="disabled">
+                                            <label for="check_{{user.empid}}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="ok" ng-click="ok()">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="js/chat.js"></script>
+    <!--<script src="js/temp.js"></script>-->
+</body>
+</html>
